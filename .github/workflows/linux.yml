@@ -271,11 +271,14 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'hyper') }}
       run: |
-        cd $HOME
+        cd "$HOME"
         git clone --quiet --depth=1 https://github.com/hyperium/hyper.git
-        cd $HOME/hyper
+        cd "$HOME/hyper"
         RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib
-        echo "LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib" >> "$GITHUB_ENV"
+        # Free up disk space
+        git ls-files -z | grep --null-data -v capi/ | xargs -0 rm
+        rm -rf "$HOME"/.cargo/registry
       name: 'install hyper'
 
     - if: ${{ contains(matrix.build.install_steps, 'intel') }}
